@@ -12,20 +12,18 @@ $(document).ready(initialize);
 function initialize(fn, flag){
   if(!canRun(flag)) {return;}
 
-//debugger;
-
   db.todaysTotal = 0;
-
   $(document).foundation();
-  // Δdb = new Firebase(db.keys.firebase);
 
+  // go to database and check for any activity so far today and update view accordingly
   initializeLogDisplay();
 
   // click-handlers
   $('.servingButton').click(clickServingButton);
   $('#searchButton').on('click', clickSearchButton);
+
+  // highlight specific search results on hover.
   $('#actualResults').on('mouseenter', 'li', function(){
-  	// debugger;
   	$(this).addClass('hover');
   });
   $('#actualResults').on('mouseleave', 'li', function(){
@@ -37,28 +35,33 @@ function initialize(fn, flag){
 // -------------------------------------------------------------------- //
 // -------------------------------------------------------------------- //
 // click-handlers
+
 function clickServingButton(e)
 {
-	// debugger;
+  // get button that was just clicked
   var $clickedButton = $(this);
   var foodType = $(this).parent().parent().attr('id');
+
+  // clicking on any button in a specific row will record the food, but only the latest bubble should
+  // blacken and record to the database.  
   var $activeButton = getActiveButton($clickedButton);
   var points = parseInt($activeButton.text());
   var date = $('#logDate span').text();
 
+  // if the button user clicked is already consumed, prompt for removal of that consumption or try again
   if($(this).hasClass('consumed'))
     clickConsumed($clickedButton);
+  // if button is not consumed, update DB, get new totals, update view
   else
   {
 		// update database with this serving of food and adjust the daily score as well.
-		sendGenericAjaxRequest('/consume', {type: foodType, points: points, date: date}, 'post', 'put', e, function(err, daily){
-			console.log(daily);
+    sendGenericAjaxRequest('/consume', {type: foodType, points: points, date: date}, 'post', 'put', e, function(daily, err){
+			console.log('back from consume!!: '+daily);
+      $activeButton.addClass('consumed');
+      db.todaysTotal = daily.score;
+      $activeButton.text('');
+      $('#dailyTotalText').text(db.todaysTotal);
 		});		
- // sendGenericAjaxRequest(url, data, verb, altVerb, event, successFn)
-	  $activeButton.addClass('consumed');
-	  db.todaysTotal += parseInt($activeButton.text());
-	  $activeButton.text('');
-	  $('#dailyTotalText').text(db.todaysTotal);
   }
 }
 
@@ -138,6 +141,8 @@ function getActiveButton($clicked)
 
 function initializeLogDisplay()
 {
+  $('#logDate span').text(moment().format('MM[/]DD[/]YY'))
+ 
 	// construct the ajax call to the server for the handling of the db search & return
 	sendGenericAjaxRequest('log', null, 'get', null, null, function(data, status, jqXHR){
 		// update the bubbles that should be blacked out and the daily score
@@ -147,9 +152,7 @@ function initializeLogDisplay()
 
 function htmlUpdateMainDisplay(data)
 {
-	// debugger;
-	console.log('ready to update display: '+data);
-
+  $('#dailyTotalText').text(data.score); 
 	blackOut('fruit', data.fruit);
 	blackOut('vegetable', data.vegetable);
 	blackOut('leanProtein', data.leanProtein);

@@ -45,9 +45,10 @@ exports.consume = function(req, res){
 							"$lt": new Date('20'+dateArray[2], dateArray[0]-1, dateArray[1]+1)}}, 
 							function(err, daily){
 		daily[req.body.type]++;
-		daily.score += req.body.points;
+		daily.score += parseInt(req.body.points);
 		daily.save(function(err, data){
-			res.send(data);
+			if(data)
+				res.send(data);
 		});								
 	}); 							 
 };

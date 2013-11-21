@@ -1,0 +1,47 @@
+function clickServingButton(e)
+{
+        // debugger;
+  var $clickedButton = $(this);
+  var foodType = $(this).parent().parent().attr('id');
+  var $activeButton = getActiveButton($clickedButton);
+  var points = parseInt($activeButton.text());
+  var date = $('#logDate span').text();
+
+  if($(this).hasClass('consumed'))
+    clickConsumed($clickedButton);
+  else
+  {
+    // update database with this serving of food and adjust the daily score as well.
+    sendGenericAjaxRequest('/consume', {type: foodType, points: points, date: date}, 'post', 'put', e, function(err, daily){
+                        console.log(daily);
+                });                
+ // sendGenericAjaxRequest(url, data, verb, altVerb, event, successFn)
+          $activeButton.addClass('consumed');
+          db.todaysTotal += parseInt($activeButton.text());
+          $activeButton.text('');
+          $('#dailyTotalText').text(db.todaysTotal);
+  }
+}
+
+// Once the user clicks the search button, this function will take the text from 
+// the search input field and construct an ajax request.  This is sent off to the 
+// nutritionix API and returned.
+function clickSearchButton(e)
+{        
+        // get data from input field on the form on the the home page
+        var query = $('input[name="food"]').val();
+
+        var data = {
+          "appId":"3e2c3c7e",
+          "appKey":"9a79016225ab7ef6a28745952e2350a5",  
+          "query": query,
+          "fields":["item_name","brand_name"],
+          "limit": 20,
+          "sort":{
+            "field":"_score",
+            "order":"desc"
+          },
+          "min_score": 1.0
+        };
+
+        //
