@@ -16,11 +16,15 @@ function initialize(fn, flag){
   $(document).foundation();
 
   // go to database and check for any activity so far today and update view accordingly
-  initializeLogDisplay();
+  var today = moment().format('MM[/]DD[/]YY')  
+  $('#logDate span').text(today);
+  initializeLogDisplay(today);
 
   // click-handlers
   $('.servingButton').click(clickServingButton);
   $('#searchButton').on('click', clickSearchButton);
+  $('#prev').on('click', clickPrev);
+  $('#next').on('click', clickNext);
 
   // highlight specific search results on hover.
   $('#actualResults').on('mouseenter', 'li', function(){
@@ -56,7 +60,7 @@ function clickServingButton(e)
   {
 		// update database with this serving of food and adjust the daily score as well.
     sendGenericAjaxRequest('/consume', {type: foodType, points: points, date: date}, 'post', 'put', e, function(daily, err){
-			console.log('back from consume!!: '+daily);
+			console.log('back from consume!!: '+daily.date);
       $activeButton.addClass('consumed');
       db.todaysTotal = daily.score;
       $activeButton.text('');
@@ -95,6 +99,25 @@ function clickSearchButton(e)
 
 	});
 }
+
+function clickPrev()
+{
+  // get the date that is currently displayed
+  var date = $('#actualDate').text();
+  date = moment(date, 'MM[/]DD[/]YY').subtract('days',1).format('MM[/]DD[/]YY')
+  $('#logDate span').text(date);
+  initializeLogDisplay(date);
+}
+
+function clickNext()
+{
+  // get the date that is currently displayed
+  var date = $('#actualDate').text();
+  date = moment(date, 'MM[/]DD[/]YY').add('days',1).format('MM[/]DD[/]YY')
+  $('#logDate span').text(date);
+  initializeLogDisplay(date);
+}
+
 
 // ------------------------------------------------------
 // ------------------------------------------------------
@@ -139,12 +162,11 @@ function getActiveButton($clicked)
 
 }
 
-function initializeLogDisplay()
+function initializeLogDisplay(date)
 {
-  $('#logDate span').text(moment().format('MM[/]DD[/]YY'))
- 
+console.log('date before ajax: '+date);
 	// construct the ajax call to the server for the handling of the db search & return
-	sendGenericAjaxRequest('log', null, 'get', null, null, function(data, status, jqXHR){
+	sendGenericAjaxRequest('/log', {date: date}, 'get', null, null, function(data, status, jqXHR){
 		// update the bubbles that should be blacked out and the daily score
 		htmlUpdateMainDisplay(data);
 	});
@@ -152,6 +174,7 @@ function initializeLogDisplay()
 
 function htmlUpdateMainDisplay(data)
 {
+  $('#mainDisplay div').removeClass('consumed');
   $('#dailyTotalText').text(data.score); 
 	blackOut('fruit', data.fruit);
 	blackOut('vegetable', data.vegetable);
@@ -168,7 +191,7 @@ function htmlUpdateMainDisplay(data)
 function blackOut(label, cycles)
 {
 	for(var i=1; i<=cycles; i++)
-		$('#'+label+' div:nth-child('+i+') div').addClass('consumed').text('');
+		$('#'+label+' div:nth-child('+i+') div').addClass('consumed');
 }
 
 // -------------------------------------------------------------------- //
