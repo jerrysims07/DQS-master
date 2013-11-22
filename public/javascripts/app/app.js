@@ -25,6 +25,7 @@ function initialize(fn, flag){
   $('#searchButton').on('click', clickSearchButton);
   $('#prev').on('click', clickPrev);
   $('#next').on('click', clickNext);
+  $('#addToJournal').on('click', clickAddToJournal)
 
   // highlight specific search results on hover.
   $('#actualResults').on('mouseenter', 'li', function(){
@@ -63,7 +64,6 @@ function clickServingButton(e)
 			console.log('back from consume!!: '+daily.date);
       $activeButton.addClass('consumed');
       db.todaysTotal = daily.score;
-      $activeButton.text('');
       $('#dailyTotalText').text(db.todaysTotal);
 		});		
   }
@@ -118,6 +118,23 @@ function clickNext()
   initializeLogDisplay(date);
 }
 
+function clickAddToJournal()
+{
+  var foodEntered = $('#foodEntered').val();
+
+// THIS IS WHERE YOU NEED TO SEND AN AJAX REQUEST TO THE DATABASE TO ADD FOOD TO THE JOURNAL
+
+  sendGenericAjaxRequest('/addJournal', foodEntered, 'post', 'put', null, function(data, status, jqXHR){
+    var $li = $('<li>');
+    $li.text(foodEntered);
+    $('#foodJournal ul').append($li);
+    $('#foodEntered').val('');
+    $('#closeMyModal').trigger('click');
+  });
+
+// sendGenericAjaxRequest(url, data, verb, altVerb, event, successFn)  
+
+}
 
 // ------------------------------------------------------
 // ------------------------------------------------------
@@ -159,7 +176,6 @@ function getActiveButton($clicked)
   return $active;
 
   // find the first servingButton on this line which is not consumed
-
 }
 
 function initializeLogDisplay(date)
