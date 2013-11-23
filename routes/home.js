@@ -3,14 +3,29 @@ var Daily = mongoose.model('Daily');
 var moment = require('moment');
 var _ = require('lodash');
 
+//-------------------------------------------------------------------
+//-------------------------------------------------------------------
+//  GET '/'
+//-------------------------------------------------------------------
+//-------------------------------------------------------------------
 exports.index = function(req, res){
   res.render('home/index', {title: 'Express'});
 };
 
+//-------------------------------------------------------------------
+//-------------------------------------------------------------------
+//  POST '/search'
+//-------------------------------------------------------------------
+//-------------------------------------------------------------------
 exports.search = function(req, res){
 	res.send(req.body);
 };
 
+//-------------------------------------------------------------------
+//-------------------------------------------------------------------
+//  PUT '/getLog'
+//-------------------------------------------------------------------
+//-------------------------------------------------------------------
 exports.getLog = function(req, res){
 	// build today's date in format that Mongo expects
 	if(req.query.date)
@@ -47,25 +62,17 @@ exports.getLog = function(req, res){
 	});
 };
 
+
+//-------------------------------------------------------------------
+//-------------------------------------------------------------------
+//  PUT '/consume'
+//-------------------------------------------------------------------
+//-------------------------------------------------------------------
 exports.consume = function(req, res){
-console.log('in consume: '+req.body.date);
-
-	// parse date in req.body into format needed to query the database
-	dateArray = req.body.date.split('/');
-	dateArray = _.map(dateArray, function(num){return parseInt(num)});
-
-
-// console.log('after split: '+dateArray);
-console.log("$lt:" +'20'+dateArray[2]+', '+(dateArray[0]-1)+', '+(dateArray[1]+1));
-
-// after split: 11,20,13
-
-
-
+	dateArray = getSearchDate(req.body.date);
 	Daily.findOne({date: {	"$gte": new Date('20'+dateArray[2], dateArray[0]-1, dateArray[1]), 
 							"$lt": new Date('20'+dateArray[2], dateArray[0]-1, dateArray[1]+1)}}, 
 							function(err, daily){
-console.log('after find: '+daily.date);
 		daily[req.body.type]++;
 		daily.score += parseInt(req.body.points);
 		daily.save(function(err, data){
@@ -75,5 +82,32 @@ console.log('after find: '+daily.date);
 	}); 							 
 };
 
+//-------------------------------------------------------------------
+//-------------------------------------------------------------------
+//  PUT '/addJournal'
+//-------------------------------------------------------------------
+//-------------------------------------------------------------------
+exports.addJournal = function(req, res){
+console.log('req.body');
+	dateArray = getSearchDate(req.body.date);
+	Daily.findOne({date: {	"$gte": new Date('20'+dateArray[2], dateArray[0]-1, dateArray[1]), 
+							"$lt": new Date('20'+dateArray[2], dateArray[0]-1, dateArray[1]+1)}}, 
+							function(err, daily){
+console.log(daily);
+		daily.journal.push(req.body.entry);
+		daily.save(function(err, data){
+console.log(daily);
+			if(data)
+				res.send(data);
+		})
+	});
+}
 
-//new Todo(req.body).save(function(err, todo, count){
+function getSearchDate(dateString)
+{
+console.log('in getSearchDate');
+	// parse date in req.body into format needed to query the database
+	var dateArray = dateString.split('/');
+	dateArray = _.map(dateArray, function(num){return parseInt(num)});
+	return dateArray;
+}

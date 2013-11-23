@@ -14,7 +14,7 @@ var Daily = mongoose.Schema({
   friedFoods: {type: Number, default: 0},
   fattyProtein: {type: Number, default: 0},
   date: Date,
-  dailyLog: [{}],
+  journal: [{}],
   createdAt : {type: Date, default: Date.now}
 });
 

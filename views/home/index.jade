@@ -187,8 +187,8 @@ block content
       .small-12.columns
         .reveal-modal#myModal(data-reveal)
           p.lead Add this food to your daily journal...
-          input#foodEntered(type: 'text', autofocus: on)
+          input#foodEntered(type: 'text', autofocus)
           a.button.tiny.radius#addToJournal OK
           <a id="closeMyModal" class="close-reveal-modal">×</a>
   #foodJournal
-    ul Today's Food Journal:
+    ul#actualJournal Today's Food Journal:

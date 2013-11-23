@@ -27,7 +27,11 @@ function initialize(fn, flag){
   $('#next').on('click', clickNext);
   $('#addToJournal').on('click', clickAddToJournal)
 
-  // highlight specific search results on hover.
+  // other event-handlers.
+  $('#myModal').on('opened', function () {
+    $('#foodEntered').focus();
+})
+
   $('#actualResults').on('mouseenter', 'li', function(){
   	$(this).addClass('hover');
   });
@@ -43,6 +47,9 @@ function initialize(fn, flag){
 
 function clickServingButton(e)
 {
+  // set focus to the textbox inside the modal that should have fired with this click
+  $('#foodEntered').focus();
+
   // get button that was just clicked
   var $clickedButton = $(this);
   var foodType = $(this).parent().parent().attr('id');
@@ -120,20 +127,20 @@ function clickNext()
 
 function clickAddToJournal()
 {
-  var foodEntered = $('#foodEntered').val();
-
+  var entry = $('#foodEntered').val();
+  var date = $('#logDate span').text();
 // THIS IS WHERE YOU NEED TO SEND AN AJAX REQUEST TO THE DATABASE TO ADD FOOD TO THE JOURNAL
 
-  sendGenericAjaxRequest('/addJournal', foodEntered, 'post', 'put', null, function(data, status, jqXHR){
-    var $li = $('<li>');
-    $li.text(foodEntered);
-    $('#foodJournal ul').append($li);
+  sendGenericAjaxRequest('/addJournal', {entry: entry, date: date}, 'post', 'put', null, function(data, status, jqXHR){
+    console.log(data);
+    if(entry){
+      var $li = $('<li>');
+      $li.text(data.journal.pop());
+      $('#foodJournal ul').append($li);
+    }
     $('#foodEntered').val('');
     $('#closeMyModal').trigger('click');
   });
-
-// sendGenericAjaxRequest(url, data, verb, altVerb, event, successFn)  
-
 }
 
 // ------------------------------------------------------
@@ -180,7 +187,6 @@ function getActiveButton($clicked)
 
 function initializeLogDisplay(date)
 {
-console.log('date before ajax: '+date);
 	// construct the ajax call to the server for the handling of the db search & return
 	sendGenericAjaxRequest('/log', {date: date}, 'get', null, null, function(data, status, jqXHR){
 		// update the bubbles that should be blacked out and the daily score
@@ -190,6 +196,7 @@ console.log('date before ajax: '+date);
 
 function htmlUpdateMainDisplay(data)
 {
+  // update the serving buttons 
   $('#mainDisplay div').removeClass('consumed');
   $('#dailyTotalText').text(data.score); 
 	blackOut('fruit', data.fruit);
@@ -202,6 +209,19 @@ function htmlUpdateMainDisplay(data)
 	blackOut('sweets', data.sweets);
 	blackOut('friedFoods', data.friedFoods);
 	blackOut('fattyProtein', data.fattyProtein);
+
+  // update the food journal by erasing it and then filling it back out
+  $('#actualJournal').empty()
+  $('#actualJournal').text('Today\'s Food Journal:');
+  for (var i = 0; i<data.journal.length; i++)
+  {
+    if(data.journal[i]){
+      var $li = $('<li>');
+      $li.text(data.journal[i]);
+      $('#actualJournal').append($li);    
+    }
+  }
+
 }
 
 function blackOut(label, cycles)
