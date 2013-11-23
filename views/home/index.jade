@@ -171,7 +171,7 @@ block content
         .row
           #dailyTotal
             span#dailyTotalText 0
-        .row
+        .row`
           #foodEntry
             form#foodSearch(action='/search', method='post')
               fieldset
@@ -183,12 +183,12 @@ block content
     .row
       .small-12.columns#searchResults.hidden Search Results
         ul#actualResults 
-    .row
-      .small-12.columns
-        .reveal-modal#myModal(data-reveal)
-          p.lead Add this food to your daily journal...
-          input#foodEntered(type: 'text', autofocus)
-          a.button.tiny.radius#addToJournal OK
-          <a id="closeMyModal" class="close-reveal-modal">×</a>
   #foodJournal
     ul#actualJournal Today's Food Journal:
+  .row
+    .small-12.columns
+      .reveal-modal.small#myModal(data-reveal)
+        p.lead Add this food to your daily journal...
+        input#foodEntered(type: 'text')
+        a.button.tiny.radius#addToJournal OK
+        <a id="closeMyModal" class="close-reveal-modal">×</a>

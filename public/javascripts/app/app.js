@@ -30,8 +30,11 @@ function initialize(fn, flag){
   // other event-handlers.
   $('#myModal').on('opened', function () {
     $('#foodEntered').focus();
-})
-
+  })
+  $('#foodEntered').on('keydown', (function(e){
+    if(e.which === 13)
+      $('#addToJournal').trigger('click');
+  }));
   $('#actualResults').on('mouseenter', 'li', function(){
   	$(this).addClass('hover');
   });
@@ -163,11 +166,32 @@ function displaySearchResults(data)
 		$li.text(data.hits[i].fields.brand_name+', '+data.hits[i].fields.item_name);
 		$('#actualResults').append($li);
 	}
-
 }
 
 function clickConsumed($clicked)
 {
+  // create a modal with a "would you like to undo this button?" message. It should include a button
+  // which explicitly says 'delete' and another that says 'cancel'
+  var $modal = $('<div>');
+  $modal.addClass('.reveal-modal');
+  $modal.attr('data-reveal');
+  var $p = $('<p>');
+  $p.text('You clicked on an item that was already used. Would you like to delete that item?');
+  var $delete = '<a class="button tiny radius" id="undoServingButton">Yes, Delete</a>';
+  var $cancel = '<a class="button tiny radius alert" id="cancel">Cancel</a>'
+  var $x = '<a class="close-reveal-modal" id="x">x</a>'
+  $p.append($delete);
+  $p.append($cancel);
+  $p.append($x);
+  $modal.append($p);
+
+
+        // .reveal-modal#myModal(data-reveal)
+        //   p.lead Add this food to your daily journal...
+        //   input#foodEntered(type: 'text')
+        //   a.button.tiny.radius#addToJournal OK
+        //   <a id="closeMyModal" class="close-reveal-modal">×</a>
+
   alert('Please choose a button that has not been consumed.');
 }
 
