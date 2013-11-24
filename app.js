@@ -20,6 +20,7 @@ app.post('/search', home.search);
 app.get('/log', home.getLog);
 app.put('/consume', home.consume);
 app.put('/addJournal', home.addJournal);
+app.put('/unclick', home.unclick);
 
 // start server & socket.io
 // var common = require('./sockets/common');

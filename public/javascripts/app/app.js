@@ -26,11 +26,16 @@ function initialize(fn, flag){
   $('#prev').on('click', clickPrev);
   $('#next').on('click', clickNext);
   $('#addToJournal').on('click', clickAddToJournal)
+  $('#closeClickedConsumed').on('click', ignoreClickConsumed);
+  $('#unclick').on('click', clickUnclick);
 
   // other event-handlers.
+  $('#closeClickedConsumed').on('closed', function(){
+    $('.reveal-modal-bg').removeClass('reveal-modal-bg');
+  });
   $('#myModal').on('opened', function () {
     $('#foodEntered').focus();
-  })
+  });
   $('#foodEntered').on('keydown', (function(e){
     if(e.which === 13)
       $('#addToJournal').trigger('click');
@@ -64,6 +69,8 @@ function clickServingButton(e)
   var date = $('#logDate span').text();
 
   // if the button user clicked is already consumed, prompt for removal of that consumption or try again
+  
+// debugger;
   if($(this).hasClass('consumed'))
     clickConsumed($clickedButton);
   // if button is not consumed, update DB, get new totals, update view
@@ -73,6 +80,8 @@ function clickServingButton(e)
     sendGenericAjaxRequest('/consume', {type: foodType, points: points, date: date}, 'post', 'put', e, function(daily, err){
 			console.log('back from consume!!: '+daily.date);
       $activeButton.addClass('consumed');
+      $activeButton.removeAttr('data-reveal-id');
+      // $activeButton.attr('data-reveal-id', 'clickedConsumed');
       db.todaysTotal = daily.score;
       $('#dailyTotalText').text(db.todaysTotal);
 		});		
@@ -146,6 +155,30 @@ function clickAddToJournal()
   });
 }
 
+function ignoreClickConsumed()
+{
+  $('#clickedConsumed').foundation('reveal', 'close');
+}
+
+function clickUnclick($this)
+{
+  // debugger;
+  var category = $(this).attr('data-clickedcat');
+  var $clicked = $(this);
+  var date = $('#logDate span').text();
+  var points = getUnclickPoints($clicked);
+  // hit the database with the category that needs to be decremented
+  sendGenericAjaxRequest('/unclick', {type: category, date: date, points: points}, 'post', 'put', null, function(data, status, jqXHR){
+    console.log(data);
+    db.todaysTotal = data.score;
+    $('#dailyTotalText').text(db.todaysTotal);
+  });
+ // sendGenericAjaxRequest(url, data, verb, altVerb, event, successFn)
+
+  console.log('this = '+$this);
+  ignoreClickConsumed();
+}
+
 // ------------------------------------------------------
 // ------------------------------------------------------
 // ------------------------------------------------------
@@ -170,35 +203,19 @@ function displaySearchResults(data)
 
 function clickConsumed($clicked)
 {
-  // create a modal with a "would you like to undo this button?" message. It should include a button
-  // which explicitly says 'delete' and another that says 'cancel'
-  var $modal = $('<div>');
-  $modal.addClass('.reveal-modal');
-  $modal.attr('data-reveal');
-  var $p = $('<p>');
-  $p.text('You clicked on an item that was already used. Would you like to delete that item?');
-  var $delete = '<a class="button tiny radius" id="undoServingButton">Yes, Delete</a>';
-  var $cancel = '<a class="button tiny radius alert" id="cancel">Cancel</a>'
-  var $x = '<a class="close-reveal-modal" id="x">x</a>'
-  $p.append($delete);
-  $p.append($cancel);
-  $p.append($x);
-  $modal.append($p);
+  // debugger;
+  console.log('line b4 modal in clickConsumed');
+  var category = $clicked.parent().parent().attr('id');
+  $('#unclick').attr('data-clickedCat', category);
+  $('#clickedConsumed').foundation('reveal', 'open');
 
-
-        // .reveal-modal#myModal(data-reveal)
-        //   p.lead Add this food to your daily journal...
-        //   input#foodEntered(type: 'text')
-        //   a.button.tiny.radius#addToJournal OK
-        //   <a id="closeMyModal" class="close-reveal-modal">×</a>
-
-  alert('Please choose a button that has not been consumed.');
+  console.log('line after modal in clickConsumed');
 }
 
 function getActiveButton($clicked)
 {
   // go  to first servingButton even if this is it.
-  var $active = $clicked.parent().parent().children().first().children()
+  var $active = $clicked.parent().parent().children().first().children();
 
   // get out of this function if first child is not consumed.
   while($active.hasClass('consumed'))
@@ -208,6 +225,27 @@ function getActiveButton($clicked)
 
   // find the first servingButton on this line which is not consumed
 }
+
+function getUnclickPoints($clicked)
+{
+  // this function will return the points of the last-clicked button in this food category
+  // so that the proper amount is subtracted from the daily total on unclick  
+
+  // go  to first servingButton even if this is it.
+  var category = $clicked.attr('data-clickedcat');
+  var $active = $('#'+category);
+  $active = $active.children().first().children()
+
+  // check next sibling for 'consumed' class and only move along if it is true
+  while($active.parent().next().children().hasClass('consumed'))
+  {
+    $active = $active.parent().next().children();
+  }
+  var points = parseInt($active.text());
+  $active.removeClass('consumed');
+  return points
+}
+
 
 function initializeLogDisplay(date)
 {
@@ -251,7 +289,11 @@ function htmlUpdateMainDisplay(data)
 function blackOut(label, cycles)
 {
 	for(var i=1; i<=cycles; i++)
-		$('#'+label+' div:nth-child('+i+') div').addClass('consumed');
+  {
+    $('#'+label+' div:nth-child('+i+') div').addClass('consumed');
+    $('#'+label+' div:nth-child('+i+') div').removeAttr('data-reveal-id');
+    // $('#'+label+' div:nth-child('+i+') div').attr('data-reveal-id', 'clickedConsumed');
+  }
 }
 
 // -------------------------------------------------------------------- //

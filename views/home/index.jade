@@ -1,6 +1,6 @@
 extends ../template/layout
 include ../mixins/form-helper
-
+@import url(http://fonts.googleapis.com/css?family=Varela+Round);
 
 block content
   #wrap
@@ -9,165 +9,192 @@ block content
         h1 Diet Quality Score
     .row
       .small-12.columns#logDate
-        a#prev <-
+        a#prev: img(src= '../images/left_arrow.png')
         span#actualDate 
-        a#next ->
+        a#next: img(src= '../images/right_arrow.png')
     .row
-      .small-8.columns
+      .small-9.columns#mainDisplayWrap
         #mainDisplay
-          #goodFoods
-            .row
-              .small-4.columns#fruitLabel Fruit
-              .small-8.columns#fruit
-                .small-2.columns
-                  .servingButton.goodFood(data-reveal-id='myModal') 2
-                .small-2.columns
-                  .servingButton.goodFood(data-reveal-id='myModal') 2
-                .small-2.columns
-                  .servingButton.goodFood(data-reveal-id='myModal') 2
-                .small-2.columns
-                  .servingButton.goodFood(data-reveal-id='myModal') 1
-                .small-2.columns
-                  .servingButton.goodFood(data-reveal-id='myModal') 0
-                .small-2.columns
-                  .servingButton.goodFood(data-reveal-id='myModal') 0
-            .row
-              .small-4.columns#vegetableLabel Vegetable
-              .small-8.columns#vegetable
-                .small-2.columns
-                  .servingButton.goodFood(data-reveal-id='myModal') 2
-                .small-2.columns
-                  .servingButton.goodFood(data-reveal-id='myModal') 2
-                .small-2.columns
-                  .servingButton.goodFood(data-reveal-id='myModal') 2
-                .small-2.columns
-                  .servingButton.goodFood(data-reveal-id='myModal') 1
-                .small-2.columns
-                  .servingButton.goodFood(data-reveal-id='myModal') 0
-                .small-2.columns
-                  .servingButton.goodFood(data-reveal-id='myModal') 0
-            .row
-              .small-4.columns#leanProteinLabel Lean Protein
-              .small-8.columns#leanProtein
-                .small-2.columns
-                  .servingButton.goodFood(data-reveal-id='myModal') 2
-                .small-2.columns
-                  .servingButton.goodFood(data-reveal-id='myModal') 2
-                .small-2.columns
-                  .servingButton.goodFood(data-reveal-id='myModal') 1
-                .small-2.columns
-                  .servingButton.goodFood(data-reveal-id='myModal') 0
-                .small-2.columns
-                  .servingButton.goodFood(data-reveal-id='myModal') 0
-                .small-2.columns
-                  .servingButton.badFood(data-reveal-id='myModal') -1
-            .row
-              .small-4.columns#wholeGrainLabel Whole Grain
-              .small-8.columns#wholeGrains
-                .small-2.columns
-                  .servingButton.goodFood(data-reveal-id='myModal') 2
-                .small-2.columns
-                  .servingButton.goodFood(data-reveal-id='myModal') 2
-                .small-2.columns
-                  .servingButton.goodFood(data-reveal-id='myModal') 1
-                .small-2.columns
-                  .servingButton.goodFood(data-reveal-id='myModal') 0
-                .small-2.columns
-                  .servingButton.goodFood(data-reveal-id='myModal') 0
-                .small-2.columns
-                  .servingButton.badFood(data-reveal-id='myModal') -1
-            .row
-              .small-4.columns#dairyLabel Lowfat Dairy
-              .small-8.columns#dairy
-                .small-2.columns
-                  .servingButton.goodFood(data-reveal-id='myModal') 1
-                .small-2.columns
-                  .servingButton.goodFood(data-reveal-id='myModal') 1
-                .small-2.columns
-                  .servingButton.goodFood(data-reveal-id='myModal') 1
-                .small-2.columns
-                  .servingButton.goodFood(data-reveal-id='myModal') 0
-                .small-2.columns
-                  .servingButton.badFood(data-reveal-id='myModal') -1
-                .small-2.columns
-                  .servingButton.badFood(data-reveal-id='myModal') -2
-            .row
-              .small-4.columns#nutsAndSeedsLabel Nuts and Seeds
-              .small-8.columns#nutsAndSeeds
-                .small-2.columns
-                  .servingButton.goodFood(data-reveal-id='myModal') 2
-                .small-2.columns
-                  .servingButton.goodFood(data-reveal-id='myModal') 0
-                .small-2.columns
-                  .servingButton.goodFood(data-reveal-id='myModal') 0
-                .small-2.columns
-                  .servingButton.goodFood(data-reveal-id='myModal') 0
-                .small-2.columns
-                  .servingButton.badFood(data-reveal-id='myModal') -1
-                .small-2.columns
-                  .servingButton.badFood(data-reveal-id='myModal') -1
-          #badFoods
-            .row
-              .small-4.columns#refinedGrainsLabel Refined Grains
-              .small-8.columns#refinedGrains
-                .small-2.columns
-                  .servingButton.badFood(data-reveal-id='myModal') -1
-                .small-2.columns
-                  .servingButton.badFood(data-reveal-id='myModal') -1
-                .small-2.columns
-                  .servingButton.badFood(data-reveal-id='myModal') -2
-                .small-2.columns
-                  .servingButton.badFood(data-reveal-id='myModal') -2
-                .small-2.columns
-                  .servingButton.badFood(data-reveal-id='myModal') -2
-                .small-2.columns
-                  .servingButton.badFood(data-reveal-id='myModal') -2
-            .row
-              .small-4.columns#sweetsLabel Sweets
-              .small-8.columns#sweets
-                .small-2.columns
-                  .servingButton.badFood(data-reveal-id='myModal') -2
-                .small-2.columns
-                  .servingButton.badFood(data-reveal-id='myModal') -2
-                .small-2.columns
-                  .servingButton.badFood(data-reveal-id='myModal') -2
-                .small-2.columns
-                  .servingButton.badFood(data-reveal-id='myModal') -2
-                .small-2.columns
-                  .servingButton.badFood(data-reveal-id='myModal') -2
-                .small-2.columns
-                  .servingButton.badFood(data-reveal-id='myModal') -2
-            .row
-              .small-4.columns#friedFoodsLabel Fried Food
-              .small-8.columns#friedFoods
-                .small-2.columns
-                  .servingButton.badFood(data-reveal-id='myModal') -2
-                .small-2.columns
-                  .servingButton.badFood(data-reveal-id='myModal') -2
-                .small-2.columns
-                  .servingButton.badFood(data-reveal-id='myModal') -2
-                .small-2.columns
-                  .servingButton.badFood(data-reveal-id='myModal') -2
-                .small-2.columns
-                  .servingButton.badFood(data-reveal-id='myModal') -2
-                .small-2.columns
-                  .servingButton.badFood(data-reveal-id='myModal') -2
-            .row
-              .small-4.columns#fattyProteinLabel Fatty Protein
-              .small-8.columns#fattyProtein
-                .small-2.columns
-                  .servingButton.badFood(data-reveal-id='myModal') -1
-                .small-2.columns
-                  .servingButton.badFood(data-reveal-id='myModal') -1
-                .small-2.columns
-                  .servingButton.badFood(data-reveal-id='myModal') -2
-                .small-2.columns
-                  .servingButton.badFood(data-reveal-id='myModal') -2
-                .small-2.columns
-                  .servingButton.badFood(data-reveal-id='myModal') -2
-                .small-2.columns
-                  .servingButton.badFood(data-reveal-id='myModal') -2
-      .small-4.columns
+          #mainDisplayHeader
+            .row#servingRow1
+              .small-2.columns
+              .small-10.columns#servingNumberWideBanner
+                .small-4.columns
+                .small-8.columns#servingNumberLabel <em>SERVING NUMBER</em>
+            .row#servingRow2
+              .small-2.columns
+              .small-10.columns#servingNumberBanner
+                .small-4.columns#foodTypeLabel FOOD TYPE
+                .small-8.columns#indyServingNumberLabels
+                  .small-2.columns 1st
+                  .small-2.columns 2nd
+                  .small-2.columns 3rd
+                  .small-2.columns 4th
+                  .small-2.columns 5th
+                  .small-2.columns 6th
+          .row#goodFoodsArea
+            .small-2.columns 
+              h4 HIGH 
+              p.quality QUALITY
+            .small-10.columns
+              #goodFoods
+                .row
+                  .small-4.columns#fruitLabel Fruit
+                  .small-8.columns#fruit
+                    .small-2.columns
+                      .servingButton.goodFood(data-reveal-id='myModal') 2
+                    .small-2.columns
+                      .servingButton.goodFood(data-reveal-id='myModal') 2
+                    .small-2.columns
+                      .servingButton.goodFood(data-reveal-id='myModal') 2
+                    .small-2.columns
+                      .servingButton.goodFood(data-reveal-id='myModal') 1
+                    .small-2.columns
+                      .servingButton.goodFood(data-reveal-id='myModal') 0
+                    .small-2.columns
+                      .servingButton.goodFood(data-reveal-id='myModal') 0
+                .row
+                  .small-4.columns#vegetableLabel Vegetable
+                  .small-8.columns#vegetable
+                    .small-2.columns
+                      .servingButton.goodFood(data-reveal-id='myModal') 2
+                    .small-2.columns
+                      .servingButton.goodFood(data-reveal-id='myModal') 2
+                    .small-2.columns
+                      .servingButton.goodFood(data-reveal-id='myModal') 2
+                    .small-2.columns
+                      .servingButton.goodFood(data-reveal-id='myModal') 1
+                    .small-2.columns
+                      .servingButton.goodFood(data-reveal-id='myModal') 0
+                    .small-2.columns
+                      .servingButton.goodFood(data-reveal-id='myModal') 0
+                .row
+                  .small-4.columns#leanProteinLabel Lean Protein
+                  .small-8.columns#leanProtein
+                    .small-2.columns
+                      .servingButton.goodFood(data-reveal-id='myModal') 2
+                    .small-2.columns
+                      .servingButton.goodFood(data-reveal-id='myModal') 2
+                    .small-2.columns
+                      .servingButton.goodFood(data- reveal-id='myModal') 1
+                    .small-2.columns
+                      .servingButton.goodFood(data-reveal-id='myModal') 0
+                    .small-2.columns
+                      .servingButton.goodFood(data-reveal-id='myModal') 0
+                    .small-2.columns
+                      .servingButton.badFood(data-reveal-id='myModal') -1
+                .row
+                  .small-4.columns#nutsAndSeedsLabel Nuts and Seeds
+                  .small-8.columns#nutsAndSeeds
+                    .small-2.columns
+                      .servingButton.goodFood(data-reveal-id='myModal') 2
+                    .small-2.columns
+                      .servingButton.goodFood(data-reveal-id='myModal') 2
+                    .small-2.columns
+                      .servingButton.goodFood(data-reveal-id='myModal') 1
+                    .small-2.columns
+                      .servingButton.goodFood(data-reveal-id='myModal') 0
+                    .small-2.columns
+                      .servingButton.goodFood(data-reveal-id='myModal') 0
+                    .small-2.columns
+                      .servingButton.badFood(data-reveal-id='myModal') -1
+                .row
+                  .small-4.columns#wholeGrainLabel Whole Grain
+                  .small-8.columns#wholeGrains
+                    .small-2.columns
+                      .servingButton.goodFood(data-reveal-id='myModal') 2
+                    .small-2.columns
+                      .servingButton.goodFood(data-reveal-id='myModal') 2
+                    .small-2.columns
+                      .servingButton.goodFood(data-reveal-id='myModal') 1
+                    .small-2.columns
+                      .servingButton.goodFood(data-reveal-id='myModal') 0
+                    .small-2.columns
+                      .servingButton.badFood(data-reveal-id='myModal') -1
+                    .small-2.columns
+                      .servingButton.badFood(data-reveal-id='myModal') -2
+                .row
+                  .small-4.columns#dairyLabel Lowfat Dairy
+                  .small-8.columns#dairy
+                    .small-2.columns
+                      .servingButton.goodFood(data-reveal-id='myModal') 1
+                    .small-2.columns
+                      .servingButton.goodFood(data-reveal-id='myModal') 1
+                    .small-2.columns
+                      .servingButton.goodFood(data-reveal-id='myModal') 1
+                    .small-2.columns
+                      .servingButton.goodFood(data-reveal-id='myModal') 0
+                    .small-2.columns
+                      .servingButton.badFood(data-reveal-id='myModal') -1
+                    .small-2.columns
+                      .servingButton.badFood(data-reveal-id='myModal') -2
+          .row#badFoodsArea
+            .small-2.columns 
+              h4 LOW 
+              p.quality QUALITY
+            .small-10.columns
+              #badFoods
+                .row
+                  .small-4.columns#refinedGrainsLabel Refined Grains
+                  .small-8.columns#refinedGrains
+                    .small-2.columns
+                      .servingButton.badFood(data-reveal-id='myModal') -1
+                    .small-2.columns
+                      .servingButton.badFood(data-reveal-id='myModal') -1
+                    .small-2.columns
+                      .servingButton.badFood(data-reveal-id='myModal') -2
+                    .small-2.columns
+                      .servingButton.badFood(data-reveal-id='myModal') -2
+                    .small-2.columns
+                      .servingButton.badFood(data-reveal-id='myModal') -2
+                    .small-2.columns
+                      .servingButton.badFood(data-reveal-id='myModal') -2
+                .row
+                  .small-4.columns#sweetsLabel Sweets
+                  .small-8.columns#sweets
+                    .small-2.columns
+                      .servingButton.badFood(data-reveal-id='myModal') -2
+                    .small-2.columns
+                      .servingButton.badFood(data-reveal-id='myModal') -2
+                    .small-2.columns
+                      .servingButton.badFood(data-reveal-id='myModal') -2
+                    .small-2.columns
+                      .servingButton.badFood(data-reveal-id='myModal') -2
+                    .small-2.columns
+                      .servingButton.badFood(data-reveal-id='myModal') -2
+                    .small-2.columns
+                      .servingButton.badFood(data-reveal-id='myModal') -2
+                .row
+                  .small-4.columns#friedFoodsLabel Fried Food
+                  .small-8.columns#friedFoods
+                    .small-2.columns
+                      .servingButton.badFood(data-reveal-id='myModal') -2
+                    .small-2.columns
+                      .servingButton.badFood(data-reveal-id='myModal') -2
+                    .small-2.columns
+                      .servingButton.badFood(data-reveal-id='myModal') -2
+                    .small-2.columns
+                      .servingButton.badFood(data-reveal-id='myModal') -2
+                    .small-2.columns
+                      .servingButton.badFood(data-reveal-id='myModal') -2
+                    .small-2.columns
+                      .servingButton.badFood(data-reveal-id='myModal') -2
+                .row
+                  .small-4.columns#fattyProteinLabel Fatty Protein
+                  .small-8.columns#fattyProtein
+                    .small-2.columns
+                      .servingButton.badFood(data-reveal-id='myModal') -1
+                    .small-2.columns
+                      .servingButton.badFood(data-reveal-id='myModal') -1
+                    .small-2.columns
+                      .servingButton.badFood(data-reveal-id='myModal') -2
+                    .small-2.columns
+                      .servingButton.badFood(data-reveal-id='myModal') -2
+                    .small-2.columns
+                      .servingButton.badFood(data-reveal-id='myModal') -2
+                    .small-2.columns
+                      .servingButton.badFood(data-reveal-id='myModal') -2
+      .small-3.columns
         .row
           #dailyTotal
             span#dailyTotalText 0
@@ -185,10 +212,14 @@ block content
         ul#actualResults 
   #foodJournal
     ul#actualJournal Today's Food Journal:
-  .row
-    .small-12.columns
-      .reveal-modal.small#myModal(data-reveal)
-        p.lead Add this food to your daily journal...
-        input#foodEntered(type: 'text')
-        a.button.tiny.radius#addToJournal OK
-        <a id="closeMyModal" class="close-reveal-modal">×</a>
+  include modals
+  .reveal-modal.small#clickedConsumed(data-reveal)
+    p.lead That item was already clicked. Unclick that item or cancel with the 'x' in the top-right corner.
+    a.button.tiny.radius#unclick Unclick that Serving
+    <a id="closeClickedConsumed" class="close-reveal-modal">x</a>
+  .reveal-modal.small#myModal(data-reveal)
+    p.lead Add this food to your daily journal...
+    input#foodEntered(type: 'text')
+    a.button.tiny.radius#addToJournal OK
+    <a id="closeMyModal" class="close-reveal-modal">×</a>
+

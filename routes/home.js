@@ -9,7 +9,7 @@ var _ = require('lodash');
 //-------------------------------------------------------------------
 //-------------------------------------------------------------------
 exports.index = function(req, res){
-  res.render('home/index', {title: 'Express'});
+  res.render('home/index', {title: 'Diet Quality Score'});
 };
 
 //-------------------------------------------------------------------
@@ -102,6 +102,28 @@ console.log(daily);
 		})
 	});
 }
+
+//-------------------------------------------------------------------
+//-------------------------------------------------------------------
+//  PUT '/unclick'
+//-------------------------------------------------------------------
+//-------------------------------------------------------------------
+exports.unclick = function(req, res){
+	dateArray = getSearchDate(req.body.date);
+	Daily.findOne({date: {	"$gte": new Date('20'+dateArray[2], dateArray[0]-1, dateArray[1]), 
+							"$lt": new Date('20'+dateArray[2], dateArray[0]-1, dateArray[1]+1)}}, 
+							function(err, daily){
+		daily[req.body.type]--;
+console.log(daily.score +' - '+req.body.points +' = ');
+		daily.score -= parseInt(req.body.points);
+console.log(daily.score);
+		daily.save(function(err, data){
+			if(data)
+				res.send(data);
+		});								
+	}); 							 
+};
+
 
 function getSearchDate(dateString)
 {
