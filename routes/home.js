@@ -30,10 +30,10 @@ exports.getLog = function(req, res){
 	// build today's date in format that Mongo expects
 	if(req.query.date)
 	{
-			date = req.query.date.split('/');
-			var year = parseInt('20'+date[2]);
-			var month = parseInt(date[0]);
-			var day = parseInt(date[1]);
+		date = req.query.date.split('/');
+		var year = parseInt('20'+date[2]);
+		var month = parseInt(date[0]);
+		var day = parseInt(date[1]);
 	}
 	else
 	{
@@ -43,20 +43,28 @@ exports.getLog = function(req, res){
 		var day = parseInt(moment().format('DD'));
 	}
 
+console.log('local user is ... '+res.locals.user);
+
 	// check to see if there is a current log for today's date in the database
 	// if not, create one and load it
-	Daily.findOne({'date': {	"$gte": new Date(year, month-1, day), 
-							"$lt": new Date(year, month-1, day+1)}}, 
+	Daily.findOne({$and:[{	'date': {	"$gte": new Date(year, month-1, day), 
+																		"$lt": new Date(year, month-1, day+1)}},
+											{	'user': res.locals.user}]}, 
 		function(err, daily){
 			if(daily)
 			{
 				console.log('yes.  daily = '+daily);
+				console.log('...and daily.user = '+daily.user);
 				res.send(daily);
 			}
 			else 
 			{
-				new Daily({date: new Date(year, month-1, day)}).save(function(err, daily,count){
-					res.send(daily);
+console.log('ready to create anew');
+				new Daily({date: new Date(year, month-1, day)}).save(function(err, daily, count){
+					daily.user = res.locals.user;
+					daily.save(function(err, daily){
+						res.send(daily);
+					})
 				});
 			}
 	});
@@ -70,8 +78,9 @@ exports.getLog = function(req, res){
 //-------------------------------------------------------------------
 exports.consume = function(req, res){
 	dateArray = getSearchDate(req.body.date);
-	Daily.findOne({date: {	"$gte": new Date('20'+dateArray[2], dateArray[0]-1, dateArray[1]), 
-							"$lt": new Date('20'+dateArray[2], dateArray[0]-1, dateArray[1]+1)}}, 
+	Daily.findOne({	'date': {	"$gte": new Date('20'+dateArray[2], dateArray[0]-1, dateArray[1]), 
+													"$lt": new Date('20'+dateArray[2], dateArray[0]-1, dateArray[1]+1)},
+									'user': res.locals.user},  
 							function(err, daily){
 		daily[req.body.type]++;
 		daily.score += parseInt(req.body.points);
@@ -88,18 +97,21 @@ exports.consume = function(req, res){
 //-------------------------------------------------------------------
 //-------------------------------------------------------------------
 exports.addJournal = function(req, res){
-console.log('req.body');
+console.log(req.body);
 	dateArray = getSearchDate(req.body.date);
-	Daily.findOne({date: {	"$gte": new Date('20'+dateArray[2], dateArray[0]-1, dateArray[1]), 
-							"$lt": new Date('20'+dateArray[2], dateArray[0]-1, dateArray[1]+1)}}, 
-							function(err, daily){
-console.log(daily);
-		daily.journal.push(req.body.entry);
-		daily.save(function(err, data){
-console.log(daily);
-			if(data)
-				res.send(data);
-		})
+	Daily.findOne({	'date': {	"$gte": new Date('20'+dateArray[2], dateArray[0]-1, dateArray[1]), 
+														"$lt": new Date('20'+dateArray[2], dateArray[0]-1, dateArray[1]+1)},
+									'user': res.locals.user}, 
+		function(err, daily){
+			if(daily){
+	console.log(daily);
+				daily.journal.push(req.body.entry);
+				daily.save(function(err, data){
+	console.log(daily);
+				if(data)
+					res.send(data);
+				});
+			}else{ console.log('error = '+err)}
 	});
 }
 
@@ -110,14 +122,15 @@ console.log(daily);
 //-------------------------------------------------------------------
 exports.unclick = function(req, res){
 	dateArray = getSearchDate(req.body.date);
-	Daily.findOne({date: {	"$gte": new Date('20'+dateArray[2], dateArray[0]-1, dateArray[1]), 
-							"$lt": new Date('20'+dateArray[2], dateArray[0]-1, dateArray[1]+1)}}, 
-							function(err, daily){
-		daily[req.body.type]--;
+	Daily.findOne({	'date': {	"$gte": new Date('20'+dateArray[2], dateArray[0]-1, dateArray[1]), 
+														"$lt": new Date('20'+dateArray[2], dateArray[0]-1, dateArray[1]+1)},
+									'user': res.locals.user}, 
+		function(err, daily){
+			daily[req.body.type]--;
 console.log(daily.score +' - '+req.body.points +' = ');
-		daily.score -= parseInt(req.body.points);
+			daily.score -= parseInt(req.body.points);
 console.log(daily.score);
-		daily.save(function(err, data){
+			daily.save(function(err, data){
 			if(data)
 				res.send(data);
 		});								

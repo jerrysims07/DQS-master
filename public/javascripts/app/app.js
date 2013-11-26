@@ -14,6 +14,7 @@ function initialize(fn, flag){
 
   db.todaysTotal = 0;
   $(document).foundation();
+  $(document).foundation('joyride', 'start');
 
   // go to database and check for any activity so far today and update view accordingly
   var today = moment().format('MM[/]DD[/]YY')  
@@ -21,6 +22,9 @@ function initialize(fn, flag){
   initializeLogDisplay(today);
 
   // click-handlers
+  $('#authentication-button').on('click', clickAuthenticationButton);
+  $('#register').on('click', clickRegister);
+  $('#login').on('click', clickLogin);
   $('.servingButton').click(clickServingButton);
   $('#searchButton').on('click', clickSearchButton);
   $('#prev').on('click', clickPrev);
@@ -55,6 +59,7 @@ function initialize(fn, flag){
 
 function clickServingButton(e)
 {
+console.log('in clickServing');
   // set focus to the textbox inside the modal that should have fired with this click
   $('#foodEntered').focus();
 
@@ -73,9 +78,10 @@ function clickServingButton(e)
 // debugger;
   if($(this).hasClass('consumed'))
     clickConsumed($clickedButton);
-  // if button is not consumed, update DB, get new totals, update view
+  // if button is not consumed, update DB, new totals, update view
   else
   {
+    setServingSizeDescription(foodType);
 		// update database with this serving of food and adjust the daily score as well.
     sendGenericAjaxRequest('/consume', {type: foodType, points: points, date: date}, 'post', 'put', e, function(daily, err){
 			console.log('back from consume!!: '+daily.date);
@@ -242,7 +248,7 @@ function getUnclickPoints($clicked)
     $active = $active.parent().next().children();
   }
   var points = parseInt($active.text());
-  $active.removeClass('consumed');
+  $active.removeClass('consumed').attr('data-reveal-id', 'myModal');
   return points
 }
 
@@ -252,6 +258,8 @@ function initializeLogDisplay(date)
 	// construct the ajax call to the server for the handling of the db search & return
 	sendGenericAjaxRequest('/log', {date: date}, 'get', null, null, function(data, status, jqXHR){
 		// update the bubbles that should be blacked out and the daily score
+console.log('initial data = '+ data);
+// debugger;
 		htmlUpdateMainDisplay(data);
 	});
 }
@@ -259,6 +267,7 @@ function initializeLogDisplay(date)
 function htmlUpdateMainDisplay(data)
 {
   // update the serving buttons 
+  $('#wrapper').removeClass('hidden');
   $('#mainDisplay div').removeClass('consumed');
   $('#dailyTotalText').text(data.score); 
 	blackOut('fruit', data.fruit);
@@ -294,6 +303,45 @@ function blackOut(label, cycles)
     $('#'+label+' div:nth-child('+i+') div').removeAttr('data-reveal-id');
     // $('#'+label+' div:nth-child('+i+') div').attr('data-reveal-id', 'clickedConsumed');
   }
+}
+
+function setServingSizeDescription(foodType)
+{
+  var sizeHelpText;
+  switch(foodType){
+    case 'fruit':
+      sizeHelpText = 'fruit';
+      break;
+    case 'vegetable':
+      sizeHelpText = 'vegetable';
+      break;
+    case 'leanProtein':
+      sizeHelpText = 'leanProtein';
+      break;
+    case 'nutsAndSeeds':
+      sizeHelpText = 'nutsAndSeeds';
+      break;
+    case 'dairy':
+      sizeHelpText = 'dairy';
+      break;
+    case 'wholeGrains':
+      sizeHelpText = 'wholeGrains';
+      break;
+    case 'refinedGrains':
+      sizeHelpText = 'refinedGrains';
+      break;
+    case 'fattyProtein':
+      sizeHelpText = 'fattyProtein';
+      break;
+    case 'friedFoods':
+      sizeHelpText = 'friedFoods';
+      break;
+    case 'sweets':
+      sizeHelpText = 'sweets';
+      break;
+  }
+
+  $('#sizeHelp').text(sizeHelpText);
 }
 
 // -------------------------------------------------------------------- //
@@ -366,4 +414,81 @@ function sendGenericAjaxRequest(url, data, verb, altVerb, event, successFn){
   if(altVerb) options.data._method = altVerb;
   $.ajax(options);
   if(event) event.preventDefault();
+}
+
+// -------------------------------------------------------------------- //
+// -------------------------------------------------------------------- //
+// -------------------------------------------------------------------- //
+
+
+function clickAuthenticationButton(e){
+  var isAnonymous = $('#authentication-button[data-email="anonymous"]').length === 1;
+
+  if(isAnonymous){
+    $('form#authentication').toggleClass('hidden');
+    $('input[name="email"]').focus();
+  } else {
+    var url = '/logout';
+    sendAjaxRequest(url, {}, 'post', 'delete', null, function(data){
+      htmlLogout(data);
+    });
+  }
+
+  e.preventDefault();
+}
+
+function clickRegister(e){
+  var url = '/users';
+  var data = $('form#authentication').serialize();
+  sendAjaxRequest(url, data, 'post', null, e, function(data){
+    console.log('in clickRegister, back from ajax ...' +data);
+    htmlRegisterComplete(data);
+  });
+}
+
+function htmlRegisterComplete(result){
+  $('input[name="email"]').val('');
+  $('input[name="password"]').val('');
+
+  if(result.status === 'ok'){
+    $('form#authentication').toggleClass('hidden');
+    // $('#wrapper').toggleClass('hidden');
+  }
+}
+
+function clickLogin(e){
+  var url = '/login';
+  var data = $('form#authentication').serialize();
+  sendAjaxRequest(url, data, 'post', 'put', e, function(data){
+    htmlUpdateLoginStatus(data);
+  });
+}
+
+function htmlUpdateLoginStatus(result){
+  $('input[name="email"]').val('');
+  $('input[name="password"]').val('');
+
+  if(result.status === 'ok'){
+    $('form#authentication').toggleClass('hidden');
+    $('#wrapper').removeClass('hidden');
+    $('#authentication-button').attr('data-email', result.email);
+    $('#authentication-button').text(result.email);
+    $('#authentication-button').addClass('alert');
+    // $('#the-application').removeClass('hidden');
+    var today = moment().format('MM[/]DD[/]YY')  
+    $('#logDate span').text(today);
+    initializeLogDisplay(today);
+
+  }
+}
+
+function htmlLogout(data){
+  $('#authentication-button').attr('data-email', 'anonymous');
+  $('#authentication-button').text('Login | Sign Up');
+  $('#authentication-button').addClass('alert');
+  // $('#wrapper').addClass('hidden');
+  $('#mainDisplay div').removeClass('consumed');
+  $('#dailyTotalText').text('0');
+
+  // window.location.href = '/';
 }
