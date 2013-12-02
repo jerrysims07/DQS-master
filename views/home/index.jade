@@ -251,10 +251,11 @@ block content
             ul#suggestion
           .row
             p Please choose your categories below:
-          .row
+          .row#categorySelects
             .small-6.columns
               label lean protein
               select#leanProteinNumSelect
+                option(value = 0) 0
                 option(value = 1) 1
                 option(value = 2) 2
                 option(value = 3) 3
@@ -262,6 +263,7 @@ block content
                 option(value = 5) 5
               label fruit
               select#fruitNumSelect
+                option(value = 0) 0
                 option(value = 1) 1
                 option(value = 2) 2
                 option(value = 3) 3
@@ -269,6 +271,7 @@ block content
                 option(value = 5) 5
               label vegetable
               select#vegetableNumSelect
+                option(value = 0) 0
                 option(value = 1) 1
                 option(value = 2) 2
                 option(value = 3) 3
@@ -276,6 +279,7 @@ block content
                 option(value = 5) 5
               label dairy
               select#dairyNumSelect
+                option(value = 0) 0
                 option(value = 1) 1
                 option(value = 2) 2
                 option(value = 3) 3
@@ -283,6 +287,7 @@ block content
                 option(value = 5) 5
               label whole grains
               select#wholeGrainsNumSelect
+                option(value = 0) 0
                 option(value = 1) 1
                 option(value = 2) 2
                 option(value = 3) 3
@@ -291,6 +296,7 @@ block content
             .small-6.columns
               label nuts and seeds
               select#nutsAndSeedsNumSelect
+                option(value = 0) 0
                 option(value = 1) 1
                 option(value = 2) 2
                 option(value = 3) 3
@@ -298,6 +304,7 @@ block content
                 option(value = 5) 5
               label refined grains
               select#refinedGrainsNumSelect
+                option(value = 0) 0
                 option(value = 1) 1
                 option(value = 2) 2
                 option(value = 3) 3
@@ -305,6 +312,7 @@ block content
                 option(value = 5) 5
               label sweets
               select#sweetsNumSelect
+                option(value = 0) 0
                 option(value = 1) 1
                 option(value = 2) 2
                 option(value = 3) 3
@@ -312,18 +320,21 @@ block content
                 option(value = 5) 5
               label fatty protein
               select#fattyProteinNumSelect
+                option(value = 0) 0
                 option(value = 1) 1
                 option(value = 2) 2
                 option(value = 3) 3
                 option(value = 4) 4
                 option(value = 5) 5
               label fried food
-              select#friedFoodNumSelect
+              select#friedFoodsNumSelect
+                option(value = 0) 0
                 option(value = 1) 1
                 option(value = 2) 2
                 option(value = 3) 3
                 option(value = 4) 4
                 option(value = 5) 5
-
-
-        <a id="closeMyModal" class="close-reveal-modal">×</a>
+          .row
+            small-2.small-offset-5.columns
+              a.button.tiny.radius#submitRecord Submit
+          <a id="closeClickedResult" class="close-reveal-modal">×</a>

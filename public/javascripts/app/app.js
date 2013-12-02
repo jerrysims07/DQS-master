@@ -35,6 +35,7 @@ function initialize(fn, flag){
   $('#actualResults').on('click','.result', clickResult);
   $('#helpMessage').on('click', clickHelpMessage);
   $('#submitServing').on('click', clickSubmitServing);
+  $('#submitRecord').on('click', clickSubmitRecord);
 
   // other event-handlers.
   $('#closeClickedConsumed').on('closed', function(){
@@ -170,10 +171,47 @@ function clickResult(e)
 
 function clickSubmitServing(e)
 {
-  debugger;
+  $('#suggestion').empty();
   var numOfServings = $('#numberOfServings').val();
+  var suggestion = $('#submitServing').data('suggestion');
+
+  for( var category in suggestion.types)
+  {
+    var $li = $('<li>');
+    var $div = $('<div>');
+    var $div2 = $('<div>');
+    $div.text(category +':  ');
+    $div.addClass('catName');
+    $li.append($div);
+    $div2.text((parseFloat(suggestion.types[category]*numOfServings)).toFixed(2));
+    $div2.addClass('catNum');
+    $li.append($div2);
+    $('#suggestion').append($li);    
+  } 
   $('#suggestionSide').removeClass('hidden');
 }
+
+function clickSubmitRecord()
+{
+  // get data out of the select boxes
+  var submission = [];
+  var $selects = $('#categorySelects select');
+  $.each($selects, function(i, n){
+    var newObj = {};   
+    newObj.label = $(n).attr('id').substring(0,$(n).attr('id').length-9);
+    newObj.servings = $(n).val();
+    submission.push(newObj);
+  });
+
+  // get date and package data for ajax call
+  var date = $('#logDate span').text();
+  sendGenericAjaxRequest('/saveServings', {submission: submission, date: date}, 'post', 'put', null, function(data, status, jqXHR){
+    console.log(data);
+    $('#closeClickedResult').trigger('click');
+    htmlUpdateMainDisplay(data);
+  });
+}
+
 
 function clickPrev()
 {
@@ -326,26 +364,13 @@ function htmlFireServingsModal(suggestion, item)
 {
   for (var i=0; i<100; i++)
   {
-
     var $option = $('<option value='+i+'>'+i+'</option>');
     $('#numberOfServings').append($option);
   }
   $('#clickedResult').foundation('reveal', 'open');
   $('#resultItem').text(item.hits[0].fields.item_name);
-  $('#serving').text(item.hits[0].fields.nf_serving_size_qty +' '+item.hits[0].fields.nf_serving_size_unit);
-  for( var category in suggestion.types)
-  {
-    var $li = $('<li>');
-    var $div = $('<div>');
-    var $div2 = $('<div>');
-    $div.text(category);
-    $div.addClass('catName');
-    $li.append($div);
-    $div2.text(suggestion.types[category].toFixed(2));
-    $div2.addClass('catNum');
-    $li.append($div2);
-    $('#suggestion').append($li);    
-  }
+  $('#serving').text(item.hits[0].fields.nf_serving_size_qty +' '+item.hits[0].fields.nf_serving_size_unit+' -- '+item.hits[0].fields.nf_calories+' calories');
+  $('#submitServing').data('suggestion', suggestion);
 }
 
 

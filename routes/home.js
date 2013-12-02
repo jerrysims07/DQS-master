@@ -182,6 +182,41 @@ console.log('lp = '+suggestion.types.leanProtein)
 	}
 }
 
+//-------------------------------------------------------------------
+//-------------------------------------------------------------------
+//  PUT '/saveServings'
+//-------------------------------------------------------------------
+//-------------------------------------------------------------------
+exports.saveServings = function(req, res){
+console.log('made it to server');
+	var date = req.body.date;
+	var submission = req.body.submission;
+console.log('date: '+date);
+	var dateArray = getSearchDate(date);	
+	Daily.findOne({	'date': {	"$gte": new Date('20'+dateArray[2], dateArray[0]-1, dateArray[1]), 
+													"$lt": new Date('20'+dateArray[2], dateArray[0]-1, dateArray[1]+1)},
+									'user': res.locals.user},  
+									function(err, daily){
+		// update each individual category
+		for( var i=0; i<submission.length; i++)
+		{
+			daily[submission[i].label]+= parseInt(submission[i].servings);
+		}
+		// // calculate the daily score
+		var dailyScore = calculateDailyScore(daily);
+console.log('final dailyScore = '+dailyScore);
+		daily.score = dailyScore;
+		daily.save(function(err, daily){
+			res.send(daily);
+		});
+	});
+};
+
+function calculateDailyScore(daily)
+{
+
+}
+
 function getFoodCategorySuggestion(target)
 {	var targetPoint = [];
 	var targetPoint = [target.calories * target.fatPercent, target.calories * target.carbPercent, target.calories * target.proteinPercent, target.calories * target.fiberPercent];
@@ -213,6 +248,134 @@ console.log('final suggestion: ...');
 for(var a in suggestion.types) console.log(a+': '+suggestion.types[a].toFixed(2));
 
 	return suggestion;
+}
+
+function calculateDailyScore(daily)
+{
+	var dailyScore = 0;
+	dailyScore += getCategoryScore('fruit', daily.fruit);
+console.log('out of fruit, dailyScore is now: '+dailyScore);
+	dailyScore += getCategoryScore('vegetable', daily.vegetable);
+console.log('out of veg, dailyScore is now: '+dailyScore);
+	dailyScore += getCategoryScore('leanProtein', daily.leanProtein);
+console.log('out of leanP, dailyScore is now: '+dailyScore);
+	dailyScore += getCategoryScore('wholeGrains', daily.wholeGrains);
+console.log('out of wholeG, dailyScore is now: '+dailyScore);
+	dailyScore += getCategoryScore('dairy', daily.dairy);
+console.log('out of dairy, dailyScore is now: '+dailyScore);
+	dailyScore += getCategoryScore('nutsAndSeeds', daily.nutsAndSeeds);
+console.log('out of nuts, dailyScore is now: '+dailyScore);
+	dailyScore += getCategoryScore('refinedGrains', daily.refinedGrains);
+console.log('out of refin, dailyScore is now: '+dailyScore);
+	dailyScore += getCategoryScore('sweets', daily.sweets);
+console.log('out of sweets, dailyScore is now: '+dailyScore);
+	dailyScore += getCategoryScore('fattyProtein', daily.fattyProtein);
+console.log('out of fattyP, dailyScore is now: '+dailyScore);
+	dailyScore += getCategoryScore('friedFood', daily.friedFood);
+console.log('out of fried, dailyScore is now: '+dailyScore);
+	return dailyScore;
+}
+
+function getCategoryScore(cat, num)
+{
+	var returnTotal = 0;
+
+	switch(cat)
+	{
+		case 'fruit':
+		case 'vegetable':
+			for (var i=1; i<=num; i++)
+			{
+				switch(i){
+					case 1:
+					case 2:
+					case 3:
+						returnTotal+=2;
+						break;
+					case 4:
+						returnTotal++;
+					default:
+						break;
+				}
+			}
+			break;
+		case 'leanProtein':
+		case 'wholeGrains':
+		case 'nutsAndSeeds':
+			for (var i=1; i<=num; i++)
+			{
+				switch(i){
+					case 1:
+					case 2:
+						returnTotal+=2;
+						break;
+					case 3:
+						returnTotal++;
+					case 0:
+					case 4:
+					case 5:
+						break;
+					case 6:
+						returnTotal--;
+						break;
+					default:
+						returnTotal -= 2;
+						break;
+				}
+			}
+			break;
+		case 'dairy':
+			for (var i=1; i<=num; i++)
+			{
+				switch(i){
+					case 1:
+					case 2:
+					case 3:
+						returnTotal++;
+						break;
+					case 0:	
+					case 4:
+						break;
+					case 5:
+						returnTotal--;
+					default:
+						returnTotal -= 2;
+						break;
+				}
+			}
+			break;
+		case 'refinedGrains':
+		case 'fattyProtein':
+			for (var i=1; i<=num; i++)
+			{
+				switch(i){
+					case 0:
+						break;
+					case 1:
+					case 2:
+						returnTotal--;
+						break;
+					default:
+						returnTotal -= 2;
+						break;
+				}
+			}			
+			break;
+		case 'sweets':
+		case 'friedFood':
+			for (var i=1; i<=num; i++)
+			{
+				switch(i){
+					case 0:
+						break;
+					default:
+						returnTotal -= 2;
+						break;
+				}
+			}			
+
+	}
+	return returnTotal;
 }
 
 function initializeCategoryVectors()
