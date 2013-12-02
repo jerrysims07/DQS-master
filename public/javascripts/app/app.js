@@ -1,10 +1,6 @@
 'use strict';
 
-// // Firebase Schema
-// var Δdb;
-
-// Local Schema (defined in keys.js)
-
+// Local Schema
 var db = {};
 
 $(document).ready(initialize);
@@ -65,6 +61,8 @@ function initialize(fn, flag){
 // -------------------------------------------------------------------- //
 // click-handlers
 
+
+
 function clickServingButton(e)
 {
 console.log('in clickServing');
@@ -100,6 +98,7 @@ console.log('in clickServing');
   }
 }
 
+// when the user clicks on the 'help' message, that message is hidden and the search form opens up
 function clickHelpMessage()
 {
   $('#helpMessage').addClass('hidden'); 
@@ -114,10 +113,10 @@ function clickSearchButton(e)
 {	
   $('#activeSearch').removeClass('hidden');
   $('#searchButton').addClass('hidden');
-console.log('searching');	
   // get data from input field on the form on the the home page
 	var query = $('input[name="food"]').val();
 
+  // prepare the data in the form that nutritionix expects to see it
 	var data = {
 	  "appId":"3e2c3c7e",
 	  "appKey":"9a79016225ab7ef6a28745952e2350a5",  
@@ -140,8 +139,12 @@ console.log('searching');
 	});
 }
 
+
+// when the user clicks on a search result, it fires a modal that will begin the process of recommending
+// how the user will categorize that food item
 function clickResult(e)
 {
+  // construct the data for the API call
   var id = $(this).attr('data-id');
   var data = {
   "appId":"3e2c3c7e",
@@ -159,21 +162,23 @@ function clickResult(e)
   var url = encodeURI(uri);
   sendGenericAjaxRequest(url, data, 'post', null, e, function(item, status, jqXHR){
     if(item){
-      // prepare an ajax request to move on to a new view to deal with the serving algorithm
+      // prepare an ajax request to move on to dealing with the serving algorithm
       sendGenericAjaxRequest('/servings', item, 'post', null, null, function(reply, status, jqXHR){
-        console.log('reply = '+reply);
         htmlFireServingsModal(reply, item);          
       });
     }
   });
 }
 
+// clicking submitServing button will open up the recommendation half of the modal and category 
+// selection boxes.
 function clickSubmitServing(e)
 {
   $('#suggestion').empty();
   var numOfServings = $('#numberOfServings').val();
   var suggestion = $('#submitServing').data('suggestion');
 
+  // dynamically create the divs to report the suggestion
   for( var category in suggestion.types)
   {
     var $li = $('<li>');
@@ -190,6 +195,8 @@ function clickSubmitServing(e)
   $('#suggestionSide').removeClass('hidden');
 }
 
+// clicking submitRecord sends the data to database and writes back to the display.
+// It also adds the food to the daily journal.
 function clickSubmitRecord()
 {
   // get data out of the select boxes
@@ -204,14 +211,15 @@ function clickSubmitRecord()
 
   // get date and package data for ajax call
   var date = $('#logDate span').text();
-  sendGenericAjaxRequest('/saveServings', {submission: submission, date: date}, 'post', 'put', null, function(data, status, jqXHR){
+  var journal = $('#resultItem').text();
+  sendGenericAjaxRequest('/saveServings', {submission: submission, date: date, journal: journal}, 'post', 'put', null, function(data, status, jqXHR){
     console.log(data);
     $('#closeClickedResult').trigger('click');
     htmlUpdateMainDisplay(data);
   });
 }
 
-
+// Look up the previous date and load that journal
 function clickPrev()
 {
   // get the date that is currently displayed
@@ -221,6 +229,7 @@ function clickPrev()
   initializeLogDisplay(date);
 }
 
+// Look up the next date and load that journal
 function clickNext()
 {
   // get the date that is currently displayed
@@ -229,6 +238,7 @@ function clickNext()
   $('#logDate span').text(date);
   initializeLogDisplay(date);
 }
+
 
 function clickAddToJournal()
 {

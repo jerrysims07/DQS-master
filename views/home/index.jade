@@ -223,14 +223,16 @@ block content
       p.lead That item was already clicked. Unclick that item or cancel with the 'x' in the top-right corner.
       a.button.tiny.radius#unclick Unclick that Serving
       <a id="closeClickedConsumed" class="close-reveal-modal">x</a>
-    .reveal-modal.small#myModal(data-reveal)
+    .reveal-modal#myModal(data-reveal)
       .row
         .small-5.columns
           p.lead Add this food to your daily journal...
-          input#foodEntered(type: 'text')
-          a.button.tiny.radius#addToJournal OK
         .small-7.columns
           #sizeHelp
+      .row
+        .small-4.small-offset-4.columns
+          input#foodEntered(type: 'text')
+          a.button.tiny.radius#addToJournal OK
         <a id="closeMyModal" class="close-reveal-modal">×</a>
     .reveal-modal#clickedResult(data-reveal)
       .row

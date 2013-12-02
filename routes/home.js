@@ -171,7 +171,7 @@ exports.saveServings = function(req, res){
 	var submission = req.body.submission;
 	var dateArray = getSearchDate(date);	
 	Daily.findOne({	'date': {	"$gte": new Date('20'+dateArray[2], dateArray[0]-1, dateArray[1]), 
-													"$lt": new Date('20'+dateArray[2], dateArray[0]-1, dateArray[1]+1)},
+														"$lt": new Date('20'+dateArray[2], dateArray[0]-1, dateArray[1]+1)},
 									'user': res.locals.user},  
 									function(err, daily){
 		// update each individual category
@@ -182,6 +182,7 @@ exports.saveServings = function(req, res){
 		// // calculate the daily score
 		var dailyScore = calculateDailyScore(daily);
 		daily.score = dailyScore;
+		daily.journal.push(req.body.journal);
 		daily.save(function(err, daily){
 			res.send(daily);
 		});
