@@ -25,6 +25,7 @@ app.put('/unclick', home.unclick);
 app.post('/users', users.create);
 app.put('/login', users.login);
 app.delete('/logout', users.logout);
+app.post('/servings', home.servings);
 
 // start server & socket.io
 // var common = require('./sockets/common');

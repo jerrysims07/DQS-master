@@ -3,21 +3,14 @@ include ../mixins/form-helper
 @import url(http://fonts.googleapis.com/css?family=Varela+Round);
 
 block content
-  .row
-    .small-6.columns
-    .small-6.columns
-      include authentication-form
   #wrapper.hidden
     #wrap
-      .row
-        .small-12.columns
-          h1 Diet Quality Score
       .row
         .small-12.columns#logDate
           a#prev: img(src= '../images/left_arrow.png')
           span#actualDate 
           a#next: img(src= '../images/right_arrow.png')
-      .row
+      .row#mainPlusTotal
         .small-9.columns#mainDisplayWrap
           #mainDisplay
             #mainDisplayHeader
@@ -201,32 +194,136 @@ block content
                         .servingButton.badFood(data-reveal-id='myModal') -2
         .small-3.columns
           .row
-            #dailyTotal
+            h3#label Daily Total
+            #dailyTotal 
               span#dailyTotalText 0
-          .row`
-            #foodEntry
+          .row
+            a#helpMessage Not sure how to score an item? Get help.
+            #foodEntry.hidden
               form#foodSearch(action='/search', method='post')
                 fieldset
                   legend Food Search
-                  .row
+                  .row#foodEntry
                     mixin field(12, 'text', 'food')
                   .row
-                    .small-6.small-offset-6.columns: a#searchButton.button.radius.success.small.expand Search
+                    .small-6.small-offset-6.columns 
+                      a#searchButton.button.radius.success.small.expand Search
+                  .row
+                      #activeSearch.hidden searching...
       .row
         .small-12.columns#searchResults.hidden Search Results
           ul#actualResults 
-    #foodJournal
-      ul#actualJournal Today's Food Journal:
+    .row
+      include authentication-form    
+      h5 Today's Food Journal:
+      #foodJournal
+        ul#actualJournal 
     include modals
     .reveal-modal.small#clickedConsumed(data-reveal)
       p.lead That item was already clicked. Unclick that item or cancel with the 'x' in the top-right corner.
       a.button.tiny.radius#unclick Unclick that Serving
       <a id="closeClickedConsumed" class="close-reveal-modal">x</a>
     .reveal-modal.small#myModal(data-reveal)
-      .small-6.columns
-        p.lead Add this food to your daily journal...
-        input#foodEntered(type: 'text')
-        a.button.tiny.radius#addToJournal OK
-      .small-6.columns
-        #sizeHelp Here is where I hope to have specific advide from the book about he proper sizes of specific groups of food.
-      <a id="closeMyModal" class="close-reveal-modal">×</a>
+      .row
+        .small-5.columns
+          p.lead Add this food to your daily journal...
+          input#foodEntered(type: 'text')
+          a.button.tiny.radius#addToJournal OK
+        .small-7.columns
+          #sizeHelp
+        <a id="closeMyModal" class="close-reveal-modal">×</a>
+    .reveal-modal#clickedResult(data-reveal)
+      .row
+        .small-6.columns
+          #resultItem
+          p Serving is listed as:
+          #serving  
+          p How many servings did you eat?
+          .row
+            .small-3.small-offset-6.columns
+              select#numberOfServings
+            .small-3.columns 
+              a.button.tiny.radius#submitServing Submit
+        .small-6.columns#suggestionSide.hidden
+          .row
+            p Here is the DQS suggestion:
+          .row
+            ul#suggestion
+          .row
+            p Please choose your categories below:
+          .row
+            .small-6.columns
+              label lean protein
+              select#leanProteinNumSelect
+                option(value = 1) 1
+                option(value = 2) 2
+                option(value = 3) 3
+                option(value = 4) 4
+                option(value = 5) 5
+              label fruit
+              select#fruitNumSelect
+                option(value = 1) 1
+                option(value = 2) 2
+                option(value = 3) 3
+                option(value = 4) 4
+                option(value = 5) 5
+              label vegetable
+              select#vegetableNumSelect
+                option(value = 1) 1
+                option(value = 2) 2
+                option(value = 3) 3
+                option(value = 4) 4
+                option(value = 5) 5
+              label dairy
+              select#dairyNumSelect
+                option(value = 1) 1
+                option(value = 2) 2
+                option(value = 3) 3
+                option(value = 4) 4
+                option(value = 5) 5
+              label whole grains
+              select#wholeGrainsNumSelect
+                option(value = 1) 1
+                option(value = 2) 2
+                option(value = 3) 3
+                option(value = 4) 4
+                option(value = 5) 5
+            .small-6.columns
+              label nuts and seeds
+              select#nutsAndSeedsNumSelect
+                option(value = 1) 1
+                option(value = 2) 2
+                option(value = 3) 3
+                option(value = 4) 4
+                option(value = 5) 5
+              label refined grains
+              select#refinedGrainsNumSelect
+                option(value = 1) 1
+                option(value = 2) 2
+                option(value = 3) 3
+                option(value = 4) 4
+                option(value = 5) 5
+              label sweets
+              select#sweetsNumSelect
+                option(value = 1) 1
+                option(value = 2) 2
+                option(value = 3) 3
+                option(value = 4) 4
+                option(value = 5) 5
+              label fatty protein
+              select#fattyProteinNumSelect
+                option(value = 1) 1
+                option(value = 2) 2
+                option(value = 3) 3
+                option(value = 4) 4
+                option(value = 5) 5
+              label fried food
+              select#friedFoodNumSelect
+                option(value = 1) 1
+                option(value = 2) 2
+                option(value = 3) 3
+                option(value = 4) 4
+                option(value = 5) 5
+
+
+        <a id="closeMyModal" class="close-reveal-modal">×</a>

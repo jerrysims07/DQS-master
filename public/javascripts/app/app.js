@@ -32,6 +32,9 @@ function initialize(fn, flag){
   $('#addToJournal').on('click', clickAddToJournal)
   $('#closeClickedConsumed').on('click', ignoreClickConsumed);
   $('#unclick').on('click', clickUnclick);
+  $('#actualResults').on('click','.result', clickResult);
+  $('#helpMessage').on('click', clickHelpMessage);
+  $('#submitServing').on('click', clickSubmitServing);
 
   // other event-handlers.
   $('#closeClickedConsumed').on('closed', function(){
@@ -40,6 +43,10 @@ function initialize(fn, flag){
   $('#myModal').on('opened', function () {
     $('#foodEntered').focus();
   });
+  $('#foodEntry').on('keydown', (function(e){
+    if(e.which === 13)
+      clickSearchButton(e);
+  }));
   $('#foodEntered').on('keydown', (function(e){
     if(e.which === 13)
       $('#addToJournal').trigger('click');
@@ -75,7 +82,6 @@ console.log('in clickServing');
 
   // if the button user clicked is already consumed, prompt for removal of that consumption or try again
   
-// debugger;
   if($(this).hasClass('consumed'))
     clickConsumed($clickedButton);
   // if button is not consumed, update DB, new totals, update view
@@ -94,25 +100,35 @@ console.log('in clickServing');
   }
 }
 
+function clickHelpMessage()
+{
+  $('#helpMessage').addClass('hidden'); 
+  $('#foodEntry').removeClass('hidden');
+  $('#foodEntry input').focus();
+}
+
 // Once the user clicks the search button, this function will take the text from 
 // the search input field and construct an ajax request.  This is sent off to the 
 // nutritionix API and returned.
 function clickSearchButton(e)
 {	
-	// get data from input field on the form on the the home page
+  $('#activeSearch').removeClass('hidden');
+  $('#searchButton').addClass('hidden');
+console.log('searching');	
+  // get data from input field on the form on the the home page
 	var query = $('input[name="food"]').val();
 
 	var data = {
 	  "appId":"3e2c3c7e",
 	  "appKey":"9a79016225ab7ef6a28745952e2350a5",  
 	  "query": query,
-	  "fields":["item_name","brand_name"],
-	  "limit": 20,
+	  "fields":["item_name","brand_name","nf_calories","nf_calories_from_fat","nf_total_fat","nf_total_carbohydrate","nf_dietary_fiber","nf_protein","nf_servings_per_container","nf_serving_size_qty","nf_serving_size_unit","nf_serving_weight_grams"],
+	  "limit": 50,
 	  "sort":{
 	    "field":"_score",
 	    "order":"desc"
 	  },
-	  "min_score": 1.0
+	  "min_score": .5
 	};
 
 	// construct the url using string concatenation and the basic API requirement. 
@@ -120,9 +136,43 @@ function clickSearchButton(e)
 	var uri = 'https://api.nutritionix.com/v1_1/search/';
 	var url = encodeURI(uri);
 	sendGenericAjaxRequest(url, data, 'post', null, e, function(data, status, jqXHR){
-		displaySearchResults(data);
-
+  	displaySearchResults(data);
 	});
+}
+
+function clickResult(e)
+{
+  var id = $(this).attr('data-id');
+  var data = {
+  "appId":"3e2c3c7e",
+  "appKey":"9a79016225ab7ef6a28745952e2350a5",  
+  "fields":["item_name","brand_name","nf_calories","nf_calories_from_fat","nf_total_fat","nf_total_carbohydrate","nf_dietary_fiber","nf_protein","nf_servings_per_container","nf_serving_size_qty","nf_serving_size_unit","nf_serving_weight_grams"],
+  "filters":{
+    "item_id": id
+  },
+  "limit": 1,
+  };
+
+  // construct the url using string concatenation and the basic API requirement. 
+  // Also, run through the URI encoding function.
+  var uri = 'https://api.nutritionix.com/v1_1/search/';
+  var url = encodeURI(uri);
+  sendGenericAjaxRequest(url, data, 'post', null, e, function(item, status, jqXHR){
+    if(item){
+      // prepare an ajax request to move on to a new view to deal with the serving algorithm
+      sendGenericAjaxRequest('/servings', item, 'post', null, null, function(reply, status, jqXHR){
+        console.log('reply = '+reply);
+        htmlFireServingsModal(reply, item);          
+      });
+    }
+  });
+}
+
+function clickSubmitServing(e)
+{
+  debugger;
+  var numOfServings = $('#numberOfServings').val();
+  $('#suggestionSide').removeClass('hidden');
 }
 
 function clickPrev()
@@ -192,17 +242,26 @@ function clickUnclick($this)
 
 function displaySearchResults(data)
 {
+  $('#actualResults').empty();
 	// display the search results area of the html DOM
 	$('#searchResults').removeClass('hidden');
-	// debugger;
+  $('#activeSearch').addClass('hidden');
+  $('#searchButton').removeClass('hidden');
 
 	var items = data.hits
 	var $li;
 	for (var i=0; i<data.hits.length; i++)
 	{
+console.log('calories = '+data.hits[i].fields.nf_calories);
+console.log('fat = '+data.hits[i].fields.nf_total_fat);
+console.log('carb = '+data.hits[i].fields.nf_total_carbohydrate);
+console.log('pro = '+data.hits[i].fields.nf_protein);
+console.log(' ');
 		$li = $('<li>');
-		$li.attr('data-id', data.hits[i].id);
+    // $li.attr('data-reveal-id', 'clickedResult');
 		$li.text(data.hits[i].fields.brand_name+', '+data.hits[i].fields.item_name);
+    $li.addClass('result');
+    $li.attr('data-id', data.hits[i]._id);
 		$('#actualResults').append($li);
 	}
 }
@@ -255,14 +314,40 @@ function getUnclickPoints($clicked)
 
 function initializeLogDisplay(date)
 {
+  $('.servingButton').attr('data-reveal-id', 'myModal');
 	// construct the ajax call to the server for the handling of the db search & return
 	sendGenericAjaxRequest('/log', {date: date}, 'get', null, null, function(data, status, jqXHR){
 		// update the bubbles that should be blacked out and the daily score
-console.log('initial data = '+ data);
-// debugger;
 		htmlUpdateMainDisplay(data);
 	});
 }
+
+function htmlFireServingsModal(suggestion, item)
+{
+  for (var i=0; i<100; i++)
+  {
+
+    var $option = $('<option value='+i+'>'+i+'</option>');
+    $('#numberOfServings').append($option);
+  }
+  $('#clickedResult').foundation('reveal', 'open');
+  $('#resultItem').text(item.hits[0].fields.item_name);
+  $('#serving').text(item.hits[0].fields.nf_serving_size_qty +' '+item.hits[0].fields.nf_serving_size_unit);
+  for( var category in suggestion.types)
+  {
+    var $li = $('<li>');
+    var $div = $('<div>');
+    var $div2 = $('<div>');
+    $div.text(category);
+    $div.addClass('catName');
+    $li.append($div);
+    $div2.text(suggestion.types[category].toFixed(2));
+    $div2.addClass('catNum');
+    $li.append($div2);
+    $('#suggestion').append($li);    
+  }
+}
+
 
 function htmlUpdateMainDisplay(data)
 {
@@ -283,7 +368,6 @@ function htmlUpdateMainDisplay(data)
 
   // update the food journal by erasing it and then filling it back out
   $('#actualJournal').empty()
-  $('#actualJournal').text('Today\'s Food Journal:');
   for (var i = 0; i<data.journal.length; i++)
   {
     if(data.journal[i]){
@@ -310,34 +394,34 @@ function setServingSizeDescription(foodType)
   var sizeHelpText;
   switch(foodType){
     case 'fruit':
-      sizeHelpText = 'fruit';
+      sizeHelpText = '"Commonsense fruit serving sizes include one medium-size piece of whole fruit, a big handful of berries, and a medium-size glass of 100 percent fruit juice."';
       break;
     case 'vegetable':
-      sizeHelpText = 'vegetable';
+      sizeHelpText = '"Commonsense vegtable serving sizes are a fist-sized portion of solid veggies, a half cup of tomato sauce, and a medium-sized bowl of vegetable soup or salad."';
       break;
     case 'leanProtein':
-      sizeHelpText = 'leanProtein';
+      sizeHelpText = '"A commonsense serving of meat or fish is the size of your open hand."';
       break;
     case 'nutsAndSeeds':
-      sizeHelpText = 'nutsAndSeeds';
+      sizeHelpText = '"A commonsense serving of nuts or seeds is a palmful.  A commonsense serving of any nut butter is a heaping tablespoon."';
       break;
     case 'dairy':
-      sizeHelpText = 'dairy';
+      sizeHelpText = '"Commonsense servings of dairy include a glass of milk or the amount of milk you\'d normally use in a bowl of breakfast cereal, two slices of deli cheese, and a single-serving tub of yogurt."';
       break;
     case 'wholeGrains':
-      sizeHelpText = 'wholeGrains';
+      sizeHelpText = '"Commonsense servings of whole grains are a fist-sized portion of brown rice, a medium-sized bowl of cereal or pasta, and two slices of bread."';
       break;
     case 'refinedGrains':
-      sizeHelpText = 'refinedGrains';
+      sizeHelpText = '"Commonsense servings are... a fist-sized portion of white rice, a medium-sized bowl of cereal or pasta, and two slices of bread."';
       break;
     case 'fattyProtein':
-      sizeHelpText = 'fattyProtein';
+      sizeHelpText = '"Fatty-protein serving sizes are the same as low-fat meat serving sizes -- enough meat to fit in your open hand."';
       break;
     case 'friedFoods':
-      sizeHelpText = 'friedFoods';
+      sizeHelpText = '"Commonsense servings of fried foods include one small bag of potato chips, one fried hamburger patty, three or four buffalo wings, one small bag of chips, one small order of french fries, and one donut."';
       break;
     case 'sweets':
-      sizeHelpText = 'sweets';
+      sizeHelpText = '"Commonsense serving sizes of sweets include one small cookie, 12 ounces of soft drink, one label-defined serving of candy or chocolate, one reular-sized slice of pie or cake, and a scoop or bowl of ice cream."';
       break;
   }
 
@@ -487,6 +571,7 @@ function htmlLogout(data){
   $('#authentication-button').text('Login | Sign Up');
   $('#authentication-button').addClass('alert');
   // $('#wrapper').addClass('hidden');
+  $('#actualJournal').empty();
   $('#mainDisplay div').removeClass('consumed');
   $('#dailyTotalText').text('0');
 
