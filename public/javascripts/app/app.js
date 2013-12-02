@@ -91,7 +91,6 @@ console.log('in clickServing');
     setServingSizeDescription(foodType);
 		// update database with this serving of food and adjust the daily score as well.
     sendGenericAjaxRequest('/consume', {type: foodType, points: points, date: date}, 'post', 'put', e, function(daily, err){
-			console.log('back from consume!!: '+daily.date);
       $activeButton.addClass('consumed');
       $activeButton.removeAttr('data-reveal-id');
       // $activeButton.attr('data-reveal-id', 'clickedConsumed');
@@ -256,7 +255,6 @@ function ignoreClickConsumed()
 
 function clickUnclick($this)
 {
-  // debugger;
   var category = $(this).attr('data-clickedcat');
   var $clicked = $(this);
   var date = $('#logDate span').text();
@@ -267,7 +265,6 @@ function clickUnclick($this)
     db.todaysTotal = data.score;
     $('#dailyTotalText').text(db.todaysTotal);
   });
- // sendGenericAjaxRequest(url, data, verb, altVerb, event, successFn)
 
   console.log('this = '+$this);
   ignoreClickConsumed();
@@ -290,13 +287,7 @@ function displaySearchResults(data)
 	var $li;
 	for (var i=0; i<data.hits.length; i++)
 	{
-console.log('calories = '+data.hits[i].fields.nf_calories);
-console.log('fat = '+data.hits[i].fields.nf_total_fat);
-console.log('carb = '+data.hits[i].fields.nf_total_carbohydrate);
-console.log('pro = '+data.hits[i].fields.nf_protein);
-console.log(' ');
 		$li = $('<li>');
-    // $li.attr('data-reveal-id', 'clickedResult');
 		$li.text(data.hits[i].fields.brand_name+', '+data.hits[i].fields.item_name);
     $li.addClass('result');
     $li.attr('data-id', data.hits[i]._id);
@@ -306,7 +297,6 @@ console.log(' ');
 
 function clickConsumed($clicked)
 {
-  // debugger;
   console.log('line b4 modal in clickConsumed');
   var category = $clicked.parent().parent().attr('id');
   $('#unclick').attr('data-clickedCat', category);
